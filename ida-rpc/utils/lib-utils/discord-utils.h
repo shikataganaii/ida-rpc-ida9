@@ -1,5 +1,7 @@
 #pragma once
 #include "discord-rpc.h"
+#include <ida.hpp>
+#include <kernwin.hpp>
 
 namespace discord_utils
 {
@@ -83,15 +85,14 @@ namespace discord_utils
 
 			( g_options.timeelapsed_enabled ) ? rpc.startTimestamp = start_time : rpc.startTimestamp = NULL;
 
-			#ifdef _Release
-			rpc.largeImageKey = "ida";
-			//rpc.smallImageKey = "ida-pro";
-			#endif
+			char version[ 32 ];
+            get_kernel_version( version, sizeof( version ) );
 
-			#ifdef _Release64
-			rpc.largeImageKey = "ida";
-			//rpc.smallImageKey = "ida-pro64";
-			#endif
+            if ( strcmp( version, "9.0" ) >= 0 ) {
+                rpc.largeImageKey = "ida";
+            } else {
+                rpc.largeImageKey = "ida"; // TODO replace with other version icons
+            }
 
 			Discord_UpdatePresence( &rpc );
 		}

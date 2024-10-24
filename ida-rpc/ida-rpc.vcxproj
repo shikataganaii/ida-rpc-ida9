@@ -76,7 +76,8 @@
       <Message>Copying bins to secondary output location</Message>
     </CustomBuildStep>
     <PostBuildEvent>
-      <Command>xcopy "$(SolutionDir)$(Platform)\$(Configuration)\ida-rpc64.dll" "$(SolutionDir)$(Platform)\bin" /i /y</Command>
+      <Command>
+      </Command>
       <Message>copy to bin folder</Message>
     </PostBuildEvent>
   </ItemDefinitionGroup>

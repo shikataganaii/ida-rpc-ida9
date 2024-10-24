@@ -1,6 +1,8 @@
 #include "includes.h"
 #include "options.h"
 #include "interface.h"
+#include <chrono>
+using namespace std::chrono;
 
 #include "utils/lib-utils/ida-utils.h"
 #include "utils/lib-utils/discord-utils.h"
@@ -19,6 +21,13 @@ const char* IDAP_comment = "IDA plugin by shigureJ";
 const char* IDAP_help    = "IDA plugin by shigureJ";
 const char* IDAP_name    = "IDA RPC";
 const char* IDAP_hotkey  = "Ctrl-Alt-R";
+int64_t       last_update_time = 0;
+const int64_t update_interval  = 5000;
+
+int64_t get_current_time_ms( )
+{
+    return duration_cast< milliseconds >( system_clock::now( ).time_since_epoch( ) ).count( );
+}
 
 #pragma region callbacks // collapse that nasty shit
 
@@ -32,10 +41,11 @@ namespace callbacks {
         case processor_t::event_t::ev_newfile:
         case processor_t::event_t::ev_newbinary:
         case processor_t::event_t::ev_rename: {
-            // if ( g_Options.output_type >= ( int )output_type::errors_results_and_interim_steps && g_Options.output_enabled ) {
-            //	msg( "[%s] %s called with notification code %i\n", IDAP_name, __FUNCTION__, notification_code );
-            // }
-            discord_utils::update_discord_presence( start_time );
+            int64_t current_time = get_current_time_ms( );
+            if ( current_time - last_update_time >= update_interval ) {
+                discord_utils::update_discord_presence( start_time );
+                last_update_time = current_time;
+            }
         } break;
 
         default:
@@ -54,12 +64,12 @@ namespace callbacks {
         case idb_event::renamed:
         case idb_event::func_added:
         case idb_event::deleting_func:
-        case idb_event::allsegs_moved:  // This event is sent when ida finishing rebasing a database
-        {
-            // if ( g_Options.output_type >= ( int )output_type::errors_results_and_interim_steps && g_Options.output_enabled ) {
-            //	msg( "[%s] %s called with notification code %i\n", IDAP_name, __FUNCTION__, notification_code );
-            // }
-            discord_utils::update_discord_presence( start_time );
+        case idb_event::allsegs_moved: {
+            int64_t current_time = get_current_time_ms( );
+            if ( current_time - last_update_time >= update_interval ) {
+                discord_utils::update_discord_presence( start_time );
+                last_update_time = current_time;
+            }
         } break;
 
         default:
@@ -225,7 +235,7 @@ static plugmod_t* idaapi IDAP_init( void )
     addon.id       = "shigureJ.IDA.RPC";
     addon.name     = "IDA RPC";
     addon.producer = "shigureJ";
-    addon.url      = "https://www.github.com/offlineJ";
+    addon.url      = "https://www.github.com/apfelteesaft";
     addon.version  = AUTO_VERSION_STR;
     addon.freeform = "Copyright (c) 2018 shigureJ <https://keybase.io/shigurej>\n"
                      "All rights reserved.\n";
