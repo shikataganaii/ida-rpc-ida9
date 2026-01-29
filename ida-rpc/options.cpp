@@ -5,7 +5,11 @@ Options g_options;
 void Options::save( const char* config_name ) {
 
 	char save_location[ MAXSTR ];
+#ifdef __LINUX__
+	qsnprintf( save_location, MAXSTR - 1, "%s/%s", get_user_idadir( ), config_name );
+#else
 	qsnprintf( save_location, MAXSTR - 1, "%s\\%s", get_user_idadir( ), config_name );
+#endif
 
 	if ( this->output_type >= ( int )output_type::errors_results_and_interim_steps && this->output_enabled ) {
 		msg( "[%s] Found IDA install directory at %s\n", plugin_name, get_user_idadir( ) );
@@ -31,7 +35,11 @@ void Options::save( const char* config_name ) {
 void Options::load( const char* config_name ) {
 
 	char save_location[ MAXSTR ];
+#ifdef __LINUX__
+	qsnprintf( save_location, MAXSTR - 1, "%s/%s", get_user_idadir( ), config_name );
+#else
 	qsnprintf( save_location, MAXSTR - 1, "%s\\%s", get_user_idadir( ), config_name );
+#endif
 
 	if ( this->output_type >= ( int )output_type::errors_results_and_interim_steps && this->output_enabled ) {
 		msg( "[%s] Found IDA install directory at %s\n", plugin_name, get_user_idadir( ) );

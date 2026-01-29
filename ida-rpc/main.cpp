@@ -205,6 +205,8 @@ static plugmod_t* idaapi hook_callbacks( )
             msg( "[%s] %s -> hook_to_notification_point( HT_OUTPUT ) was successful\n", IDAP_name, __FUNCTION__ );
         }
     }
+
+    return PLUGIN_KEEP;
 }
 
 static void idaapi unhook_callbacks( )

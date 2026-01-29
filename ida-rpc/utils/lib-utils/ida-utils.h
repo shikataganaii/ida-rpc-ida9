@@ -5,69 +5,67 @@
 
 namespace ida_utils
 {
-	bool is_idb_loaded( ) {
+	// Static buffers to avoid returning local variable addresses
+	static char s_filename[ MAXSTR ];
+	static char s_processor_module[ MAXSTR ];
+	static char s_func_name[ MAXSTR ];
 
-		return ( strlen( get_path( PATH_TYPE_IDB ) ) != 0 );
+	bool is_idb_loaded( ) {
+		const char* path = get_path( PATH_TYPE_IDB );
+		return ( path != NULL && strlen( path ) != 0 );
 	}
 
 	const char* get_current_filename( ) {
-
-		char filename[ MAXSTR ];
-		ssize_t read_size = 0;
-
-		read_size = get_root_filename( filename, sizeof( filename ) );
-
+		ssize_t read_size = get_root_filename( s_filename, sizeof( s_filename ) );
 		if ( read_size > 0 ) {
-			return filename;
+			return s_filename;
 		}
+		return "(unknown)";
 	}
 
 	const char* get_current_processor_module( ) {
-
-		char processor_module[ MAXSTR ];
-
-		if ( get_idp_name( processor_module, sizeof( processor_module ) ) != NULL ) {
-			return processor_module;
+		if ( get_idp_name( s_processor_module, sizeof( s_processor_module ) ) != NULL ) {
+			return s_processor_module;
 		}
+		return "(unknown)";
 	}
 
 	ea_t get_current_cursor_address( ) {
-
 		ea_t cur_addr = get_screen_ea( );
-
-		if ( is_code( get_flags( cur_addr ) ) && cur_addr != NULL ) {
+		if ( cur_addr != BADADDR && is_code( get_flags( cur_addr ) ) ) {
 			return cur_addr;
 		}
+		return BADADDR;
 	}
 
 	ea_t get_current_function_start_address( ) {
-
 		ea_t cur_addr = get_current_cursor_address( );
+		if ( cur_addr == BADADDR ) {
+			return BADADDR;
+		}
 
 		func_t *func = get_func( cur_addr );
-
 		if ( func != NULL ) {
 			return func->start_ea;
 		}
+		return BADADDR;
 	}
 
 	const char* get_current_function_name( ) {
-
 		ea_t cur_addr = get_current_cursor_address( );
+		if ( cur_addr == BADADDR ) {
+			return NULL;
+		}
 
 		func_t *func = get_func( cur_addr );
-
-		ssize_t size_read = 0;
-
 		if ( func != NULL ) {
-
 			qstring func_name;
-
-			size_read = get_func_name( &func_name, func->start_ea );
-
+			ssize_t size_read = get_func_name( &func_name, func->start_ea );
 			if ( size_read > 0 ) {
-				return func_name.c_str( );
+				qstrncpy( s_func_name, func_name.c_str(), sizeof( s_func_name ) );
+				return s_func_name;
 			}
 		}
+		return NULL;
 	}
 }
