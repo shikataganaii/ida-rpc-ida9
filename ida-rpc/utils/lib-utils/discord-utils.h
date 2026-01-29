@@ -3,8 +3,11 @@
 
 namespace discord_utils
 {
+#ifdef __LINUX__
+	static void handle_discord_ready( const DiscordUser* user ) {
+#else
 	static void handle_discord_ready( ) {
-
+#endif
 		if ( g_options.output_type >= ( int )output_type::errors_results_and_interim_steps && g_options.output_enabled ) {
 			msg( "Discord: ready\n" );
 		}
@@ -81,7 +84,7 @@ namespace discord_utils
 			
 			( g_options.functionname_enabled ) ? rpc.state = state : rpc.state = "";
 
-			( g_options.timeelapsed_enabled ) ? rpc.startTimestamp = start_time : rpc.startTimestamp = NULL;
+			( g_options.timeelapsed_enabled ) ? rpc.startTimestamp = start_time : rpc.startTimestamp = 0;
 
 			#ifdef _Release
 			rpc.largeImageKey = "ida";
